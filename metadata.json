@@ -1,5 +1,5 @@
 {
-  "name": "Amit Meena Weather",
+  "name": "Weather Forecast",
   "description": "Production-quality Weather Intelligence application featuring advanced notifications, multi-city favorites, customizable widgets, and offline PWA architecture.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

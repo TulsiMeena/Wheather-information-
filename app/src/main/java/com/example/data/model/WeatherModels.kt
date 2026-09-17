@@ -16,7 +16,10 @@ data class HourlyForecast(
     val weatherCode: Int,
     val condition: String,
     val precipProb: Int
-)
+) {
+    val temperature: Double get() = temp
+    val precipitationProbability: Int get() = precipProb
+}
 
 data class DailyForecast(
     val date: String,
@@ -36,7 +39,9 @@ data class HistoricalDay(
     val tempMin: Double,
     val tempMean: Double,
     val condition: String,
-    val rainSum: Double
+    val rainSum: Double,
+    val weatherCode: Int = 0,
+    val precipitation: Double = rainSum
 )
 
 data class AirQualityData(
@@ -48,7 +53,9 @@ data class AirQualityData(
     val no2: Double,
     val co: Double,
     val healthAdvice: String
-)
+) {
+    val status: String get() = aqiCategory
+}
 
 data class WeatherData(
     val city: City,

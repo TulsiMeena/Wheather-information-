@@ -1,21 +1,35 @@
 package com.example.ui.viewmodel
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.Location
+import android.location.LocationManager
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.model.*
 import com.example.data.repository.WeatherRepository
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class WeatherViewModel(
     private val repository: WeatherRepository = WeatherRepository()
 ) : ViewModel() {
 
-    private val _selectedCity = MutableStateFlow(repository.defaultCities[0]) // New Delhi
+    private val _selectedCity = MutableStateFlow(repository.defaultCities[0]) // New Delhi default fallback
     val selectedCity: StateFlow<City> = _selectedCity.asStateFlow()
 
     private val _weatherData = MutableStateFlow<WeatherData?>(null)
@@ -23,6 +37,15 @@ class WeatherViewModel(
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _isLocating = MutableStateFlow(false)
+    val isLocating: StateFlow<Boolean> = _isLocating.asStateFlow()
+
+    private val _hasLocationPermission = MutableStateFlow(false)
+    val hasLocationPermission: StateFlow<Boolean> = _hasLocationPermission.asStateFlow()
+
+    private val _isCurrentLocationSelected = MutableStateFlow(false)
+    val isCurrentLocationSelected: StateFlow<Boolean> = _isCurrentLocationSelected.asStateFlow()
 
     private val _favoriteCities = MutableStateFlow(repository.defaultCities.filter { it.isFavorite })
     val favoriteCities: StateFlow<List<City>> = _favoriteCities.asStateFlow()
@@ -48,7 +71,119 @@ class WeatherViewModel(
         loadWeatherForCity(_selectedCity.value)
     }
 
+    fun setLocationPermissionGranted(granted: Boolean, context: Context? = null) {
+        _hasLocationPermission.value = granted
+        if (granted && context != null) {
+            fetchCurrentLocation(context)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun fetchCurrentLocation(context: Context) {
+        val appContext = context.applicationContext
+        val finePerm = ContextCompat.checkSelfPermission(appContext, Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarsePerm = ContextCompat.checkSelfPermission(appContext, Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        if (finePerm != PackageManager.PERMISSION_GRANTED && coarsePerm != PackageManager.PERMISSION_GRANTED) {
+            _hasLocationPermission.value = false
+            return
+        }
+
+        _hasLocationPermission.value = true
+        _isLocating.value = true
+
+        val fusedClient = LocationServices.getFusedLocationProviderClient(appContext)
+        val cts = CancellationTokenSource()
+
+        // Safety timeout (10s) to prevent infinite loading spinner if GPS is disabled or slow
+        viewModelScope.launch {
+            delay(10000)
+            if (_isLocating.value) {
+                try { cts.cancel() } catch (_: Exception) {}
+                _isLocating.value = false
+            }
+        }
+
+        fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
+            .addOnSuccessListener { loc: Location? ->
+                if (loc != null) {
+                    processResolvedLocation(loc.latitude, loc.longitude, appContext)
+                } else {
+                    // Fallback to lastLocation or LocationManager
+                    fusedClient.lastLocation.addOnSuccessListener { lastLoc: Location? ->
+                        if (lastLoc != null) {
+                            processResolvedLocation(lastLoc.latitude, lastLoc.longitude, appContext)
+                        } else {
+                            fallbackToLocationManager(appContext)
+                        }
+                    }.addOnFailureListener {
+                        fallbackToLocationManager(appContext)
+                    }
+                }
+            }
+            .addOnFailureListener {
+                fallbackToLocationManager(appContext)
+            }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun fallbackToLocationManager(context: Context) {
+        val appContext = context.applicationContext
+        val lm = appContext.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+        val loc = lm?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            ?: lm?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            ?: lm?.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
+
+        if (loc != null) {
+            processResolvedLocation(loc.latitude, loc.longitude, appContext)
+        } else {
+            _isLocating.value = false
+        }
+    }
+
+    private fun processResolvedLocation(lat: Double, lon: Double, context: Context) {
+        val appContext = context.applicationContext
+        viewModelScope.launch(Dispatchers.IO) {
+            var cityName = "Current Location"
+            var countryName = "Detected GPS"
+
+            try {
+                val geocoder = Geocoder(appContext, Locale.getDefault())
+                @Suppress("DEPRECATION")
+                val addresses = geocoder.getFromLocation(lat, lon, 1)
+                val addr = addresses?.firstOrNull()
+                if (addr != null) {
+                    cityName = addr.locality
+                        ?: addr.subAdminArea
+                        ?: addr.adminArea
+                        ?: "Local Area"
+                    countryName = addr.countryName ?: "GPS"
+                }
+            } catch (_: Exception) {
+                // Fallback to coordinate label if reverse geocoding offline
+                cityName = String.format(Locale.US, "GPS (%.2f, %.2f)", lat, lon)
+            }
+
+            val currentCity = City(
+                id = "current_gps_location",
+                name = cityName,
+                country = countryName,
+                lat = lat,
+                lon = lon,
+                isFavorite = false
+            )
+
+            withContext(Dispatchers.Main) {
+                _isCurrentLocationSelected.value = true
+                _selectedCity.value = currentCity
+                _isLocating.value = false
+                loadWeatherForCity(currentCity)
+            }
+        }
+    }
+
     fun selectCity(city: City) {
+        _isCurrentLocationSelected.value = (city.id == "current_gps_location")
         _selectedCity.value = city
         _searchQuery.value = ""
         _searchResults.value = emptyList()
@@ -56,8 +191,12 @@ class WeatherViewModel(
         loadWeatherForCity(city)
     }
 
-    fun refreshWeather() {
-        loadWeatherForCity(_selectedCity.value)
+    fun refreshWeather(context: Context? = null) {
+        if (_isCurrentLocationSelected.value && context != null && _hasLocationPermission.value) {
+            fetchCurrentLocation(context)
+        } else {
+            loadWeatherForCity(_selectedCity.value)
+        }
     }
 
     private fun loadWeatherForCity(city: City) {
@@ -95,7 +234,7 @@ class WeatherViewModel(
             return
         }
         searchJob = viewModelScope.launch {
-            delay(300) // Debounce
+            delay(300)
             val results = repository.searchCities(query)
             _searchResults.value = results
         }
@@ -114,6 +253,13 @@ class WeatherViewModel(
     }
 
     fun formatTemp(celsius: Double): String {
+        return when (_tempUnit.value) {
+            TemperatureUnit.CELSIUS -> "${Math.round(celsius)}°"
+            TemperatureUnit.FAHRENHEIT -> "${Math.round(celsius * 9.0 / 5.0 + 32.0)}°"
+        }
+    }
+
+    fun formatTempWithUnit(celsius: Double): String {
         return when (_tempUnit.value) {
             TemperatureUnit.CELSIUS -> "${Math.round(celsius)}°C"
             TemperatureUnit.FAHRENHEIT -> "${Math.round(celsius * 9.0 / 5.0 + 32.0)}°F"

@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -36,117 +35,84 @@ fun SettingsScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp)
+            .padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 28.dp)
     ) {
-        // App Brand & Ownership Banner
+        // App Info Banner
         item {
-            Box(
+            Card(
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = CardSurface),
+                border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                Color(0xFF0F172A),
-                                Color(0xFF1E293B),
-                                Color(0xFF0369A1)
-                            )
-                        )
-                    )
-                    .border(1.dp, CardBorder, RoundedCornerShape(24.dp))
-                    .padding(20.dp)
                     .testTag("app_identity_banner")
             ) {
                 Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(64.dp)
-                            .clip(RoundedCornerShape(18.dp))
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
                             .background(Color(0xFF0B1329))
-                            .border(1.5.dp, SkyCyan, RoundedCornerShape(18.dp)),
+                            .border(1.dp, SkyCyan, RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Cloud,
                             contentDescription = "Weather Icon",
                             tint = SkyCyan,
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                     }
 
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
-                            text = "Amit Meena Weather",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.ExtraBold,
+                            text = "Weather Forecast",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
                             color = TextPrimary
                         )
                         Text(
-                            text = "Synoptic Weather Intelligence & Telemetry",
+                            text = "Live Meteorological Telemetry",
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary
+                            color = TextSecondary,
+                            fontSize = 11.sp
                         )
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.padding(top = 4.dp)
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = Color(0x3338BDF8),
-                                border = null
-                            ) {
-                                Text(
-                                    text = "v1.4.0 Production",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = SkyCyan,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = Color(0x3310B981),
-                                border = null
-                            ) {
-                                Text(
-                                    text = "Verified",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = AqiGreen,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
-                        }
                     }
                 }
             }
         }
 
-        // Units Section
+        // Section: Units
         item {
             Text(
                 text = "MEASUREMENT UNITS",
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 color = SkyCyan,
-                letterSpacing = 1.sp
+                letterSpacing = 0.8.sp
             )
         }
 
         // Temperature Unit Selector
         item {
             Card(
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = CardSurface),
                 border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -155,35 +121,36 @@ fun SettingsScreen(
                         Column {
                             Text(
                                 text = "Temperature Unit",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
                                 color = TextPrimary
                             )
                             Text(
-                                text = "Currently set to ${tempUnit.symbol}",
+                                text = "Selected: ${tempUnit.symbol}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = TextSecondary
+                                color = TextSecondary,
+                                fontSize = 11.sp
                             )
                         }
                         Icon(
                             imageVector = Icons.Outlined.Thermostat,
                             contentDescription = null,
                             tint = SkyCyan,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        UnitOptionButton(
+                        CompactUnitOptionButton(
                             title = "Celsius (°C)",
                             isSelected = tempUnit == TemperatureUnit.CELSIUS,
                             onClick = { viewModel.setTempUnit(TemperatureUnit.CELSIUS) },
                             modifier = Modifier.weight(1f).testTag("unit_celsius_btn")
                         )
-                        UnitOptionButton(
+                        CompactUnitOptionButton(
                             title = "Fahrenheit (°F)",
                             isSelected = tempUnit == TemperatureUnit.FAHRENHEIT,
                             onClick = { viewModel.setTempUnit(TemperatureUnit.FAHRENHEIT) },
@@ -197,12 +164,15 @@ fun SettingsScreen(
         // Wind Speed Unit Selector
         item {
             Card(
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = CardSurface),
                 border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -211,35 +181,36 @@ fun SettingsScreen(
                         Column {
                             Text(
                                 text = "Wind Speed Unit",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
                                 color = TextPrimary
                             )
                             Text(
-                                text = "Currently set to ${windUnit.symbol}",
+                                text = "Selected: ${windUnit.symbol}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = TextSecondary
+                                color = TextSecondary,
+                                fontSize = 11.sp
                             )
                         }
                         Icon(
                             imageVector = Icons.Outlined.Air,
                             contentDescription = null,
                             tint = SkyCyan,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        UnitOptionButton(
+                        CompactUnitOptionButton(
                             title = "Kilometers/hr (km/h)",
                             isSelected = windUnit == WindSpeedUnit.KMH,
                             onClick = { viewModel.setWindUnit(WindSpeedUnit.KMH) },
                             modifier = Modifier.weight(1f).testTag("unit_kmh_btn")
                         )
-                        UnitOptionButton(
+                        CompactUnitOptionButton(
                             title = "Miles/hr (mph)",
                             isSelected = windUnit == WindSpeedUnit.MPH,
                             onClick = { viewModel.setWindUnit(WindSpeedUnit.MPH) },
@@ -250,35 +221,35 @@ fun SettingsScreen(
             }
         }
 
-        // Telemetry & Diagnostics Status
+        // System & Sources
         item {
             Text(
-                text = "SYSTEM & METEOROLOGICAL SOURCE",
-                style = MaterialTheme.typography.labelMedium,
+                text = "DATA PROVIDER",
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 color = SkyCyan,
-                letterSpacing = 1.sp
+                letterSpacing = 0.8.sp
             )
         }
 
         item {
             Card(
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = CardSurface),
                 border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    DetailRow(label = "Primary Synoptic Provider", value = "Open-Meteo & ECMWF ERA5")
-                    Divider(color = Color(0x22FFFFFF))
-                    DetailRow(label = "Air Quality Standards", value = "US EPA & Copernicus CAMS")
-                    Divider(color = Color(0x22FFFFFF))
-                    DetailRow(label = "Application Owner", value = "Amit Meena")
-                    Divider(color = Color(0x22FFFFFF))
-                    DetailRow(label = "Build Target", value = "Android 14+ Edge-to-Edge")
+                    CompactDetailRow(label = "Synoptic Source", value = "Open-Meteo & ECMWF")
+                    HorizontalDivider(color = Color(0x18FFFFFF))
+                    CompactDetailRow(label = "Air Quality Standards", value = "US EPA & Copernicus")
+                    HorizontalDivider(color = Color(0x18FFFFFF))
+                    CompactDetailRow(label = "Location Provider", value = "FusedLocation & GPS")
+                    HorizontalDivider(color = Color(0x18FFFFFF))
+                    CompactDetailRow(label = "Target Platform", value = "Android Material 3")
                 }
             }
         }
@@ -286,7 +257,7 @@ fun SettingsScreen(
 }
 
 @Composable
-fun UnitOptionButton(
+fun CompactUnitOptionButton(
     title: String,
     isSelected: Boolean,
     onClick: () -> Unit,
@@ -294,28 +265,29 @@ fun UnitOptionButton(
 ) {
     Box(
         modifier = modifier
-            .height(44.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) SkyBlue else Color(0x1838BDF8))
+            .height(36.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (isSelected) SkyBlue else CardSurfaceVariant)
             .border(
                 1.dp,
-                if (isSelected) SkyCyan else Color(0x2238BDF8),
-                RoundedCornerShape(12.dp)
+                if (isSelected) SkyCyan else CardBorder,
+                RoundedCornerShape(10.dp)
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) TextPrimary else TextSecondary
+            color = if (isSelected) TextPrimary else TextSecondary,
+            fontSize = 11.sp
         )
     }
 }
 
 @Composable
-fun DetailRow(label: String, value: String) {
+fun CompactDetailRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -324,13 +296,15 @@ fun DetailRow(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = TextSecondary
+            color = TextSecondary,
+            fontSize = 12.sp
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.SemiBold,
-            color = TextPrimary
+            color = TextPrimary,
+            fontSize = 12.sp
         )
     }
 }

@@ -1,7 +1,6 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,14 +13,17 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.City
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.WeatherViewModel
@@ -34,9 +36,15 @@ fun CitiesScreen(
     searchQuery: String,
     searchResults: List<City>,
     onCitySelected: (City) -> Unit,
+    onRequestLocationPermission: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val presets = listOf(
+    val context = LocalContext.current
+    val hasLocationPermission by viewModel.hasLocationPermission.collectAsStateWithLifecycle()
+    val isLocating by viewModel.isLocating.collectAsStateWithLifecycle()
+    val isCurrentLocSelected by viewModel.isCurrentLocationSelected.collectAsStateWithLifecycle()
+
+    val popularPresets = listOf(
         City("delhi", "New Delhi", "India", 28.6139, 77.2090),
         City("mumbai", "Mumbai", "India", 19.0760, 72.8777),
         City("jaipur", "Jaipur", "India", 26.9124, 75.7873),
@@ -48,36 +56,41 @@ fun CitiesScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp)
+            .padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 28.dp)
     ) {
-        // Search Bar
+        // Compact Search Field
         item {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.onSearchQueryChanged(it) },
-                placeholder = { Text("Search any city worldwide...", color = TextSecondary) },
+                placeholder = { Text("Search any city worldwide...", color = TextSecondary, fontSize = 13.sp) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = SkyCyan
+                        tint = SkyCyan,
+                        modifier = Modifier.size(18.dp)
                     )
                 },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
+                        IconButton(
+                            onClick = { viewModel.onSearchQueryChanged("") },
+                            modifier = Modifier.size(32.dp)
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Clear",
-                                tint = TextSecondary
+                                tint = TextSecondary,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = SkyCyan,
                     unfocusedBorderColor = CardBorder,
@@ -92,20 +105,110 @@ fun CitiesScreen(
             )
         }
 
+        // Live GPS Exact Location Card
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isCurrentLocSelected) CardSurfaceVariant else CardSurface
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (isCurrentLocSelected) SkyCyan else CardBorder
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (hasLocationPermission) {
+                            viewModel.fetchCurrentLocation(context)
+                        } else {
+                            onRequestLocationPermission()
+                        }
+                    }
+                    .testTag("use_gps_location_card")
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(if (isCurrentLocSelected) SkyBlue else Color(0x2238BDF8)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MyLocation,
+                                contentDescription = null,
+                                tint = if (isCurrentLocSelected) TextPrimary else SkyCyan,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    text = "Use Exact Location (GPS)",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                if (isLocating) {
+                                    CircularProgressIndicator(
+                                        color = SkyCyan,
+                                        strokeWidth = 2.dp,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                }
+                            }
+                            Text(
+                                text = if (hasLocationPermission) "Detect your live local weather" else "Tap to grant location access",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+
+                    if (isCurrentLocSelected) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = SkyBlue
+                        ) {
+                            Text(
+                                text = "Active",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         // Live Search Results
         if (searchResults.isNotEmpty()) {
             item {
                 Text(
                     text = "SEARCH RESULTS",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = SkyCyan,
-                    letterSpacing = 1.sp
+                    letterSpacing = 0.8.sp
                 )
             }
 
             items(searchResults) { city ->
-                CityItemCard(
+                CompactCityRow(
                     city = city,
                     isSelected = selectedCity.name == city.name && selectedCity.country == city.country,
                     isFavorite = viewModel.isFavorite(city),
@@ -115,27 +218,27 @@ fun CitiesScreen(
             }
         }
 
-        // Quick Presets Row
+        // Popular Presets Row
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    text = "POPULAR LOCATIONS",
-                    style = MaterialTheme.typography.labelMedium,
+                    text = "POPULAR CITIES",
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = SkyCyan,
-                    letterSpacing = 1.sp
+                    letterSpacing = 0.8.sp
                 )
 
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(vertical = 4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    contentPadding = PaddingValues(vertical = 2.dp)
                 ) {
-                    items(presets) { city ->
+                    items(popularPresets) { city ->
                         val isSelected = selectedCity.name == city.name
                         FilterChip(
                             selected = isSelected,
                             onClick = { onCitySelected(city) },
-                            label = { Text(city.name) },
+                            label = { Text(city.name, fontSize = 12.sp) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = SkyBlue,
                                 selectedLabelColor = TextPrimary,
@@ -147,7 +250,7 @@ fun CitiesScreen(
                                 selected = isSelected,
                                 borderColor = if (isSelected) SkyCyan else CardBorder
                             ),
-                            shape = RoundedCornerShape(14.dp)
+                            shape = RoundedCornerShape(12.dp)
                         )
                     }
                 }
@@ -157,50 +260,46 @@ fun CitiesScreen(
         // Saved / Favorite Cities List
         item {
             Text(
-                text = "SAVED & FAVORITE CITIES",
-                style = MaterialTheme.typography.labelMedium,
+                text = "SAVED FAVORITES",
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 color = SunGold,
-                letterSpacing = 1.sp,
-                modifier = Modifier.padding(top = 8.dp)
+                letterSpacing = 0.8.sp,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
 
         if (favoriteCities.isEmpty()) {
             item {
                 Card(
-                    shape = RoundedCornerShape(18.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = CardSurface),
                     border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(24.dp),
+                        modifier = Modifier.padding(18.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.StarOutline,
                             contentDescription = null,
                             tint = SunGold,
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                         Text(
-                            text = "No favorite cities added yet",
+                            text = "No saved cities yet",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary
-                        )
-                        Text(
-                            text = "Star any city to quickly monitor its weather conditions.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary
+                            color = TextSecondary,
+                            fontSize = 13.sp
                         )
                     }
                 }
             }
         } else {
             items(favoriteCities) { city ->
-                CityItemCard(
+                CompactCityRow(
                     city = city,
                     isSelected = selectedCity.name == city.name && selectedCity.country == city.country,
                     isFavorite = true,
@@ -213,7 +312,7 @@ fun CitiesScreen(
 }
 
 @Composable
-fun CityItemCard(
+fun CompactCityRow(
     city: City,
     isSelected: Boolean,
     isFavorite: Boolean,
@@ -221,7 +320,7 @@ fun CityItemCard(
     onToggleFavorite: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) CardSurfaceVariant else CardSurface
         ),
@@ -237,18 +336,18 @@ fun CityItemCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 14.dp),
+                .padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.weight(1f)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(30.dp)
                         .clip(CircleShape)
                         .background(if (isSelected) SkyBlue else Color(0x2238BDF8)),
                     contentAlignment = Alignment.Center
@@ -257,33 +356,37 @@ fun CityItemCard(
                         imageVector = if (isSelected) Icons.Default.Check else Icons.Default.LocationCity,
                         contentDescription = null,
                         tint = TextPrimary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
 
                 Column {
                     Text(
                         text = city.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
                         color = TextPrimary
                     )
                     Text(
                         text = city.country,
                         style = MaterialTheme.typography.bodySmall,
-                        color = TextSecondary
+                        color = TextSecondary,
+                        fontSize = 11.sp
                     )
                 }
             }
 
             IconButton(
                 onClick = onToggleFavorite,
-                modifier = Modifier.testTag("fav_btn_${city.name}")
+                modifier = Modifier
+                    .size(36.dp)
+                    .testTag("fav_btn_${city.name}")
             ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Star else Icons.Outlined.StarOutline,
                     contentDescription = if (isFavorite) "Remove favorite" else "Add favorite",
-                    tint = if (isFavorite) SunGold else TextSecondary
+                    tint = if (isFavorite) SunGold else TextSecondary,
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }

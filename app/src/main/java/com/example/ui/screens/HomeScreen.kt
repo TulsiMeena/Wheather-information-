@@ -1,7 +1,9 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -13,16 +15,23 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.data.model.DailyForecast
 import com.example.data.model.HourlyForecast
 import com.example.data.model.WeatherData
 import com.example.ui.theme.*
@@ -32,50 +41,116 @@ import com.example.ui.viewmodel.WeatherViewModel
 fun HomeScreen(
     weather: WeatherData,
     viewModel: WeatherViewModel,
+    onRequestLocationPermission: () -> Unit,
     onNavigateToForecast: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val hasLocationPermission by viewModel.hasLocationPermission.collectAsStateWithLifecycle()
+    val isLocating by viewModel.isLocating.collectAsStateWithLifecycle()
+    val isCurrentLocation by viewModel.isCurrentLocationSelected.collectAsStateWithLifecycle()
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp)
+            .padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 28.dp)
     ) {
-        // Hero Weather Card
+        // Location Permission Banner (If not yet granted)
+        if (!hasLocationPermission) {
+            item {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0x280284C7)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SkyCyan.copy(alpha = 0.5f)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("location_permission_banner")
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MyLocation,
+                                contentDescription = null,
+                                tint = SkyCyan,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = "Enable exact location",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = "Get live local weather for where you are",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+                        Button(
+                            onClick = onRequestLocationPermission,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = SkyCyan,
+                                contentColor = DeepNavy
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.height(34.dp)
+                        ) {
+                            Text("Allow", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Google Weather Style Compact Hero
         item {
-            HeroWeatherCard(
+            GoogleWeatherHero(
                 weather = weather,
-                viewModel = viewModel
+                viewModel = viewModel,
+                isCurrentLocation = isCurrentLocation,
+                isLocating = isLocating,
+                onFetchGpsLocation = { viewModel.fetchCurrentLocation(context) }
             )
         }
 
-        // Live Condition Alert Banner
+        // Google Weather Style Hourly Carousel
         item {
-            WeatherConditionBanner(weather = weather)
-        }
-
-        // Hourly Forecast Section
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "HOURLY TIMELINE (24H)",
+                        text = "HOURLY FORECAST",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = SkyCyan,
-                        letterSpacing = 1.sp
+                        letterSpacing = 0.8.sp
                     )
                     TextButton(
                         onClick = onNavigateToForecast,
-                        modifier = Modifier.testTag("view_7day_button")
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+                        modifier = Modifier.height(28.dp)
                     ) {
                         Text(
-                            text = "7-Day Forecast →",
+                            text = "Next 7 Days →",
                             style = MaterialTheme.typography.labelSmall,
                             color = SkyCyan
                         )
@@ -83,67 +158,76 @@ fun HomeScreen(
                 }
 
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(vertical = 4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(vertical = 2.dp)
                 ) {
                     items(weather.hourly) { hourly ->
-                        HourlyForecastCard(hourly = hourly, viewModel = viewModel)
+                        GoogleHourlyCard(hourly = hourly, viewModel = viewModel)
                     }
                 }
             }
         }
 
-        // Meteorological Metrics Grid
+        // Google Weather Signature 7-Day Forecast Card with Temperature Bars
+        item {
+            GoogleWeeklyForecastCard(
+                daily = weather.daily,
+                viewModel = viewModel,
+                onViewFull = onNavigateToForecast
+            )
+        }
+
+        // 2-Column Google Weather Metrics Grid
         item {
             Text(
-                text = "SYNOPTIC TELEMETRY",
+                text = "CURRENT CONDITIONS",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = SkyCyan,
-                letterSpacing = 1.sp,
-                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                letterSpacing = 0.8.sp,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
 
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                MetricCard(
-                    title = "Humidity",
-                    value = "${weather.humidity}%",
-                    subtitle = "Dew point normal",
-                    icon = Icons.Outlined.WaterDrop,
-                    modifier = Modifier.weight(1f)
-                )
-                MetricCard(
+                CompactMetricTile(
                     title = "Wind",
                     value = viewModel.formatWind(weather.windSpeed),
-                    subtitle = "Direction: ${weather.windDirection}°",
+                    subtitle = "Direction ${weather.windDirection}°",
                     icon = Icons.Outlined.Air,
                     modifier = Modifier.weight(1f)
                 )
+                CompactMetricTile(
+                    title = "Humidity",
+                    value = "${weather.humidity}%",
+                    subtitle = "Dew point comfortable",
+                    icon = Icons.Outlined.WaterDrop,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
 
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                MetricCard(
+                CompactMetricTile(
                     title = "UV Index",
                     value = "${weather.uvIndex}",
-                    subtitle = if (weather.uvIndex > 6) "Very High" else "Moderate",
+                    subtitle = if (weather.uvIndex >= 6) "Very High" else "Moderate",
                     icon = Icons.Outlined.WbSunny,
                     modifier = Modifier.weight(1f)
                 )
-                MetricCard(
+                CompactMetricTile(
                     title = "Pressure",
                     value = "${Math.round(weather.pressure)} hPa",
-                    subtitle = "Barometric steady",
-                    icon = Icons.Outlined.Compress,
+                    subtitle = "Normal & steady",
+                    icon = Icons.Outlined.Speed,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -152,20 +236,20 @@ fun HomeScreen(
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                MetricCard(
-                    title = "Sunrise",
-                    value = weather.sunrise,
-                    subtitle = "Golden hour",
+                CompactMetricTile(
+                    title = "Sunrise & Sunset",
+                    value = "${weather.sunrise} • ${weather.sunset}",
+                    subtitle = "Daylight 12h 16m",
                     icon = Icons.Outlined.WbTwilight,
                     modifier = Modifier.weight(1f)
                 )
-                MetricCard(
-                    title = "Sunset",
-                    value = weather.sunset,
-                    subtitle = "Dusk begins",
-                    icon = Icons.Outlined.NightsStay,
+                CompactMetricTile(
+                    title = "Air Quality",
+                    value = "AQI ${weather.airQuality.aqi}",
+                    subtitle = weather.airQuality.status,
+                    icon = Icons.Outlined.Eco,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -174,215 +258,153 @@ fun HomeScreen(
 }
 
 @Composable
-fun HeroWeatherCard(
+fun GoogleWeatherHero(
     weather: WeatherData,
-    viewModel: WeatherViewModel
+    viewModel: WeatherViewModel,
+    isCurrentLocation: Boolean,
+    isLocating: Boolean,
+    onFetchGpsLocation: () -> Unit
 ) {
-    Box(
+    Card(
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = CardSurface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF1E293B),
-                        Color(0xFF0F172A),
-                        Color(0xFF0A1128)
-                    )
-                )
-            )
-            .border(1.dp, CardBorder, RoundedCornerShape(28.dp))
-            .padding(24.dp)
             .testTag("hero_weather_card")
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = SkyCyan,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = weather.city.name,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                    }
-                    Text(
-                        text = weather.city.country,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary,
-                        modifier = Modifier.padding(start = 24.dp)
-                    )
-                }
-
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0x3338BDF8),
-                    border = null
-                ) {
-                    Text(
-                        text = weather.lastUpdated,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = SkyCyan,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Large Temperature Display
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Header Location Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = if (isCurrentLocation) Icons.Default.NearMe else Icons.Default.LocationOn,
+                        contentDescription = "Location",
+                        tint = SkyCyan,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = weather.city.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    if (isCurrentLocation) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = Color(0x3338BDF8)
+                        ) {
+                            Text(
+                                text = "GPS",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = SkyCyan,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                            )
+                        }
+                    }
+                }
+
+                IconButton(
+                    onClick = onFetchGpsLocation,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .testTag("gps_locate_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MyLocation,
+                        contentDescription = "Update GPS Location",
+                        tint = if (isLocating) SunGold else SkyCyan,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+
+            // Temperature & Condition Row (Google Weather Layout)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         text = viewModel.formatTemp(weather.temperature),
-                        fontSize = 64.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 54.sp,
+                        fontWeight = FontWeight.Light,
                         color = TextPrimary,
-                        letterSpacing = (-2).sp
+                        letterSpacing = (-1).sp
                     )
                     Text(
                         text = weather.condition,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = SunGold
+                        color = TextPrimary
                     )
                     Text(
-                        text = "Feels like ${viewModel.formatTemp(weather.feelsLike)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary
+                        text = "H: ${viewModel.formatTemp(weather.tempMax)} • L: ${viewModel.formatTemp(weather.tempMin)} • Feels like ${viewModel.formatTemp(weather.feelsLike)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary,
+                        fontSize = 12.sp
                     )
                 }
 
-                // Decorative Icon Container
                 Box(
                     modifier = Modifier
-                        .size(96.dp)
+                        .size(68.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.radialGradient(
-                                colors = listOf(Color(0x33FBBF24), Color(0x00000000))
+                                colors = listOf(Color(0x3338BDF8), Color(0x050284C7))
                             )
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = getWeatherIcon(weather.weatherCode),
+                        imageVector = getWeatherIconVector(weather.weatherCode),
                         contentDescription = weather.condition,
-                        tint = if (weather.weatherCode == 0) SunGold else SkyCyan,
-                        modifier = Modifier.size(64.dp)
+                        tint = if (weather.weatherCode in listOf(0, 1)) SunGold else SkyCyan,
+                        modifier = Modifier.size(42.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // High & Low Bar
+            // Subtle Status Pill Bar
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0x22101C3D))
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.SpaceAround
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowUpward,
-                        contentDescription = null,
-                        tint = SunOrange,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0x18FFFFFF)
+                ) {
                     Text(
-                        text = "High: ${viewModel.formatTemp(weather.tempMax)}",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = "AQI ${weather.airQuality.aqi} • ${weather.airQuality.status}",
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,
-                        color = TextPrimary
+                        color = getAqiColor(weather.airQuality.aqi),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
 
-                Divider(
-                    modifier = Modifier
-                        .height(18.dp)
-                        .width(1.dp),
-                    color = Color(0x33FFFFFF)
-                )
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDownward,
-                        contentDescription = null,
-                        tint = SkyCyan,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Low: ${viewModel.formatTemp(weather.tempMin)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = TextPrimary
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun WeatherConditionBanner(weather: WeatherData) {
-    Card(
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = CardSurface),
-        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color(0x3338BDF8)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = null,
-                    tint = SkyCyan,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Meteorological Summary",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
-                Text(
-                    text = "${weather.condition} across ${weather.city.name} with ${weather.humidity}% relative humidity.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary
+                    text = weather.lastUpdated,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextSecondary,
+                    fontSize = 11.sp
                 )
             }
         }
@@ -390,70 +412,200 @@ fun WeatherConditionBanner(weather: WeatherData) {
 }
 
 @Composable
-fun HourlyForecastCard(
+fun GoogleHourlyCard(
     hourly: HourlyForecast,
     viewModel: WeatherViewModel
 ) {
     Card(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = CardSurface),
         border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
         modifier = Modifier
-            .width(82.dp)
-            .testTag("hourly_card_${hourly.hourLabel}")
+            .width(58.dp)
+            .height(96.dp)
     ) {
         Column(
             modifier = Modifier
-                .padding(vertical = 14.dp, horizontal = 8.dp)
-                .fillMaxWidth(),
+                .fillMaxSize()
+                .padding(vertical = 8.dp, horizontal = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = hourly.hourLabel,
-                style = MaterialTheme.typography.labelMedium,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextSecondary
             )
 
             Icon(
-                imageVector = getWeatherIcon(hourly.weatherCode),
-                contentDescription = hourly.condition,
-                tint = if (hourly.weatherCode == 0) SunGold else SkyCyan,
-                modifier = Modifier.size(28.dp)
+                imageVector = getWeatherIconVector(hourly.weatherCode),
+                contentDescription = null,
+                tint = if (hourly.weatherCode in listOf(0, 1)) SunGold else SkyCyan,
+                modifier = Modifier.size(22.dp)
             )
 
+            if (hourly.precipitationProbability > 0) {
+                Text(
+                    text = "${hourly.precipitationProbability}%",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = SkyCyan
+                )
+            }
+
             Text(
-                text = viewModel.formatTemp(hourly.temp),
-                style = MaterialTheme.typography.bodyMedium,
+                text = viewModel.formatTemp(hourly.temperature),
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
             )
+        }
+    }
+}
 
-            if (hourly.precipProb > 0) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Outlined.WaterDrop,
-                        contentDescription = null,
-                        tint = SkyCyan,
-                        modifier = Modifier.size(12.dp)
-                    )
+@Composable
+fun GoogleWeeklyForecastCard(
+    daily: List<DailyForecast>,
+    viewModel: WeatherViewModel,
+    onViewFull: () -> Unit
+) {
+    val overallMin = daily.minOfOrNull { it.tempMin } ?: 15.0
+    val overallMax = daily.maxOfOrNull { it.tempMax } ?: 35.0
+    val tempRange = (overallMax - overallMin).coerceAtLeast(1.0)
+
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = CardSurface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("google_weekly_card")
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "7-DAY OUTLOOK",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = SkyCyan,
+                    letterSpacing = 0.8.sp
+                )
+                Text(
+                    text = "High / Low Range",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextSecondary,
+                    fontSize = 11.sp
+                )
+            }
+
+            daily.take(7).forEach { day ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Day Name
                     Text(
-                        text = "${hourly.precipProb}%",
-                        fontSize = 10.sp,
-                        color = SkyCyan,
-                        fontWeight = FontWeight.Bold
+                        text = day.dayName.split(",").firstOrNull() ?: day.dayName,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary,
+                        modifier = Modifier.width(52.dp)
+                    )
+
+                    // Weather Icon & rain chance
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.width(44.dp)
+                    ) {
+                        Icon(
+                            imageVector = getWeatherIconVector(day.weatherCode),
+                            contentDescription = null,
+                            tint = if (day.weatherCode in listOf(0, 1)) SunGold else SkyCyan,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        if (day.rainSum > 0.5) {
+                            Text(
+                                text = "💧",
+                                fontSize = 9.sp
+                            )
+                        }
+                    }
+
+                    // Low temp
+                    Text(
+                        text = viewModel.formatTemp(day.tempMin),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium,
+                        color = TextSecondary,
+                        modifier = Modifier.width(32.dp)
+                    )
+
+                    // Google Weather signature horizontal gradient temperature bar
+                    val startFraction = ((day.tempMin - overallMin) / tempRange).toFloat().coerceIn(0f, 1f)
+                    val endFraction = ((day.tempMax - overallMin) / tempRange).toFloat().coerceIn(0f, 1f)
+
+                    Canvas(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(6.dp)
+                            .padding(horizontal = 6.dp)
+                    ) {
+                        val w = size.width
+                        val h = size.height
+                        val radius = CornerRadius(h / 2f, h / 2f)
+
+                        // Track background
+                        drawRoundRect(
+                            color = Color(0x28FFFFFF),
+                            size = Size(w, h),
+                            cornerRadius = radius
+                        )
+
+                        // Active gradient range
+                        val startX = (startFraction * w).coerceIn(0f, w - 8f)
+                        val endX = (endFraction * w).coerceIn(startX + 8f, w)
+                        val barWidth = (endX - startX).coerceAtLeast(8f)
+
+                        drawRoundRect(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(SkyCyan, SunGold),
+                                startX = startX,
+                                endX = endX
+                            ),
+                            topLeft = Offset(startX, 0f),
+                            size = Size(barWidth, h),
+                            cornerRadius = radius
+                        )
+                    }
+
+                    // High temp
+                    Text(
+                        text = viewModel.formatTemp(day.tempMax),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        modifier = Modifier.width(32.dp)
                     )
                 }
-            } else {
-                Spacer(modifier = Modifier.height(14.dp))
             }
         }
     }
 }
 
 @Composable
-fun MetricCard(
+fun CompactMetricTile(
     title: String,
     value: String,
     subtitle: String,
@@ -461,56 +613,67 @@ fun MetricCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = CardSurface),
         border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TextSecondary
-                )
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = SkyCyan,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextSecondary,
+                    fontSize = 11.sp
                 )
             }
+
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
             )
+
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.labelSmall,
-                color = TextSecondary
+                style = MaterialTheme.typography.bodySmall,
+                color = TextSecondary,
+                fontSize = 11.sp
             )
         }
     }
 }
 
-fun getWeatherIcon(code: Int): ImageVector {
+fun getWeatherIconVector(code: Int): ImageVector {
     return when (code) {
         0 -> Icons.Default.WbSunny
         1, 2 -> Icons.Default.WbCloudy
         3 -> Icons.Default.Cloud
-        45, 48 -> Icons.Default.CloudQueue
-        51, 53, 55, 61, 63, 65, 80, 81, 82 -> Icons.Default.WaterDrop
-        71, 73, 75 -> Icons.Default.AcUnit
-        95, 96, 99 -> Icons.Default.FlashOn
-        else -> Icons.Default.WbCloudy
+        45, 48 -> Icons.Default.Foggy
+        51, 53, 55, 61, 63, 65 -> Icons.Default.WaterDrop
+        80, 81, 82 -> Icons.Default.Thunderstorm
+        else -> Icons.Default.CloudQueue
+    }
+}
+
+fun getAqiColor(aqi: Int): Color {
+    return when {
+        aqi <= 50 -> AqiGreen
+        aqi <= 100 -> AqiYellow
+        aqi <= 150 -> AqiOrange
+        else -> AqiRed
     }
 }

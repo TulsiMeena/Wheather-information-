@@ -9,13 +9,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.outlined.HealthAndSafety
-import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -40,162 +38,169 @@ fun AirQualityScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp)
+            .padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 28.dp)
     ) {
-        // Hero AQI Gauge Card
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(28.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFF1E293B),
-                                Color(0xFF0F172A),
-                                Color(0xFF0A1128)
-                            )
-                        )
-                    )
-                    .border(1.dp, CardBorder, RoundedCornerShape(28.dp))
-                    .padding(24.dp)
-                    .testTag("aqi_hero_card"),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "AIR QUALITY INDEX (AQI)",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = SkyCyan,
-                        letterSpacing = 1.sp
-                    )
-
-                    // Big Circular Badge
-                    Box(
-                        modifier = Modifier
-                            .size(140.dp)
-                            .clip(CircleShape)
-                            .background(Color(0x22FFFFFF))
-                            .border(6.dp, aqiColor, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "${airQuality.aqi}",
-                                fontSize = 48.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = TextPrimary
-                            )
-                            Text(
-                                text = "US AQI",
-                                fontSize = 11.sp,
-                                color = TextSecondary,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = aqiColor.copy(alpha = 0.2f),
-                        border = null
-                    ) {
-                        Text(
-                            text = airQuality.aqiCategory,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = aqiColor,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                        )
-                    }
-
-                    Text(
-                        text = "Station location: $cityName",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextSecondary
-                    )
-                }
-            }
-        }
-
-        // Health Advisory Card
+        // Compact Hero AQI Card
         item {
             Card(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = CardSurface),
                 border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
-                modifier = Modifier.fillMaxWidth().testTag("health_advisory_card")
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("aqi_hero_card")
             ) {
                 Row(
-                    modifier = Modifier.padding(18.dp),
-                    verticalAlignment = Alignment.Top
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Air,
+                                contentDescription = null,
+                                tint = aqiColor,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = "AIR QUALITY INDEX",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = SkyCyan,
+                                letterSpacing = 0.8.sp
+                            )
+                        }
+
+                        Text(
+                            text = airQuality.status,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = aqiColor
+                        )
+
+                        Text(
+                            text = "$cityName • US EPA Standard",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary,
+                            fontSize = 11.sp
+                        )
+                    }
+
+                    // Compact Circular Badge
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                            .background(Color(0x18000000))
+                            .border(2.5.dp, aqiColor, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "${airQuality.aqi}",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = TextPrimary
+                            )
+                            Text(
+                                text = "AQI",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = aqiColor
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Compact Health Recommendation
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = CardSurface),
+                border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(44.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
-                            .background(Color(0x3310B981)),
+                            .background(Color(0x2210B981)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.HealthAndSafety,
                             contentDescription = null,
                             tint = AqiGreen,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
-                            text = "Health Advisory & Recommendations",
-                            style = MaterialTheme.typography.titleMedium,
+                            text = "Health Advisory",
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
                         )
                         Text(
                             text = airQuality.healthAdvice,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary,
+                            fontSize = 11.sp
                         )
                     }
                 }
             }
         }
 
-        // Pollutants Section Title
+        // Compact Pollutants Grid Header
         item {
             Text(
-                text = "POLLUTANT CONCENTRATIONS",
-                style = MaterialTheme.typography.labelMedium,
+                text = "ATMOSPHERIC POLLUTANTS",
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 color = SkyCyan,
-                letterSpacing = 1.sp,
-                modifier = Modifier.padding(top = 8.dp)
+                letterSpacing = 0.8.sp,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
 
-        // Pollutant Cards
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                PollutantCard(
+                CompactPollutantCard(
                     name = "PM2.5",
+                    label = "Fine Particles",
                     value = "${airQuality.pm25} µg/m³",
-                    desc = "Fine Inhalable Particles",
+                    status = if (airQuality.pm25 <= 15) "Good" else "Moderate",
+                    statusColor = if (airQuality.pm25 <= 15) AqiGreen else AqiYellow,
                     modifier = Modifier.weight(1f)
                 )
-                PollutantCard(
+                CompactPollutantCard(
                     name = "PM10",
+                    label = "Coarse Dust",
                     value = "${airQuality.pm10} µg/m³",
-                    desc = "Respirable Coarse Particles",
+                    status = if (airQuality.pm10 <= 45) "Good" else "Moderate",
+                    statusColor = if (airQuality.pm10 <= 45) AqiGreen else AqiYellow,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -204,67 +209,85 @@ fun AirQualityScreen(
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                PollutantCard(
-                    name = "Ozone (O₃)",
+                CompactPollutantCard(
+                    name = "O3",
+                    label = "Ozone",
                     value = "${airQuality.o3} µg/m³",
-                    desc = "Ground-level Ozone",
+                    status = "Normal",
+                    statusColor = AqiGreen,
                     modifier = Modifier.weight(1f)
                 )
-                PollutantCard(
-                    name = "NO₂",
+                CompactPollutantCard(
+                    name = "NO2",
+                    label = "Nitrogen Dioxide",
                     value = "${airQuality.no2} µg/m³",
-                    desc = "Nitrogen Dioxide",
+                    status = "Clean",
+                    statusColor = AqiGreen,
                     modifier = Modifier.weight(1f)
                 )
             }
-        }
-
-        item {
-            PollutantCard(
-                name = "Carbon Monoxide (CO)",
-                value = "${airQuality.co} µg/m³",
-                desc = "Combustion Byproduct Telemetry",
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
 
 @Composable
-fun PollutantCard(
+fun CompactPollutantCard(
     name: String,
+    label: String,
     value: String,
-    desc: String,
+    status: String,
+    statusColor: Color,
     modifier: Modifier = Modifier
 ) {
     Card(
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = CardSurface),
         border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = SkyCyan
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = statusColor.copy(alpha = 0.2f)
+                ) {
+                    Text(
+                        text = status,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = statusColor,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = SkyCyan
             )
+
             Text(
-                text = desc,
+                text = label,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextSecondary
+                color = TextSecondary,
+                fontSize = 11.sp
             )
         }
     }

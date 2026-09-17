@@ -100,12 +100,21 @@ class WeatherRepository {
             val startIndex = 0
             for (i in startIndex until minOf(hTimes.length(), startIndex + 24)) {
                 val fullTime = hTimes.getString(i)
-                val hourLabel = fullTime.takeLast(5)
+                val rawHour = fullTime.takeLast(5)
+                val hourInt = rawHour.take(2).toIntOrNull() ?: 0
+                val displayLabel = if (i == 0) "Now" else {
+                    when {
+                        hourInt == 0 -> "12 AM"
+                        hourInt < 12 -> "${hourInt} AM"
+                        hourInt == 12 -> "12 PM"
+                        else -> "${hourInt - 12} PM"
+                    }
+                }
                 val hCode = hCodes.optInt(i, 0)
                 hourlyList.add(
                     HourlyForecast(
                         time = fullTime,
-                        hourLabel = hourLabel,
+                        hourLabel = displayLabel,
                         temp = hTemps.optDouble(i, temp),
                         weatherCode = hCode,
                         condition = mapWeatherCode(hCode),
@@ -344,7 +353,7 @@ class WeatherRepository {
         conn.requestMethod = "GET"
         conn.connectTimeout = 8000
         conn.readTimeout = 8000
-        conn.setRequestProperty("User-Agent", "AmitMeenaWeather/1.4 (Android)")
+        conn.setRequestProperty("User-Agent", "WeatherForecast/1.4 (Android)")
         conn.connect()
 
         if (conn.responseCode !in 200..299) {

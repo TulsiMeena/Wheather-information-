@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Amit Meena Weather</string>
+    <string name="app_name">Weather Forecast</string>
     <string name="tab_today">Today</string>
     <string name="tab_forecast">Forecast</string>
     <string name="tab_aqi">Air Quality</string>
