@@ -1,0 +1,201 @@
+.customize-widgets-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.customize-widgets-modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.15));
+}
+
+.customize-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.customize-header-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.modal-heading {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.modal-subheading {
+  font-size: var(--text-2xs);
+  color: var(--color-text-muted);
+  margin: 0.15rem 0 0 0;
+}
+
+.widgets-list-body {
+  padding: 0.75rem 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 55vh;
+}
+
+.widget-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all var(--transition-fast);
+}
+
+.widget-item-row.is-hidden {
+  opacity: 0.5;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.widget-item-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.widget-index-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.widget-label-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.widget-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.widget-status-text {
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+}
+
+.widget-item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.reorder-pair {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+.widget-btn-arrow {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.widget-btn-arrow:hover:not(:disabled) {
+  color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.widget-btn-arrow:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+.btn-toggle-vis {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-lg);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-toggle-vis.active {
+  background: rgba(14, 165, 233, 0.15);
+  color: var(--color-primary);
+}
+
+.btn-toggle-vis.active:hover {
+  background: rgba(14, 165, 233, 0.25);
+}
+
+.btn-toggle-vis.inactive {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-muted);
+}
+
+.customize-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.reset-btn,
+.done-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}

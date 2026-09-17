@@ -1,0 +1,55 @@
+{
+  "name": "Amit Meena Weather",
+  "short_name": "AM Weather",
+  "description": "Production-grade meteorological platform with multi-city monitoring, smart alerts, and offline intelligence.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Live Weather",
+      "short_name": "Weather",
+      "description": "View live atmospheric conditions",
+      "url": "/?page=home",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "10-Day Forecast",
+      "short_name": "Forecast",
+      "description": "Extended 10-day meteorological outlook",
+      "url": "/?page=forecast",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Radar Map",
+      "short_name": "Map",
+      "description": "Live weather layers and precipitation radar",
+      "url": "/?page=map",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Air Quality Index",
+      "short_name": "AQI",
+      "description": "Atmospheric air quality & pollution telemetry",
+      "url": "/?page=airquality",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Favorite Cities",
+      "short_name": "Favorites",
+      "description": "Multi-city atmospheric telemetry dashboard",
+      "url": "/?page=favorites",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    }
+  ]
+}

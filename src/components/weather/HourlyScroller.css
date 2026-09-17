@@ -1,0 +1,116 @@
+.hourly-scroller-card {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow: hidden;
+}
+
+.hourly-scroller-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hourly-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hourly-scroller-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.scroller-view-all {
+  font-size: var(--text-xs);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.hourly-scroll-strip {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hourly-scroll-strip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.hourly-scroll-strip::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.hourly-snap-card {
+  flex: 0 0 76px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 6px;
+  background: var(--color-bg-input);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-fast);
+}
+
+.hourly-snap-card.active-hour {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(14, 165, 233, 0.4);
+  box-shadow: 0 0 12px rgba(14, 165, 233, 0.2);
+}
+
+.hourly-snap-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.active-hour .hourly-snap-time {
+  color: var(--color-primary);
+}
+
+.hourly-snap-icon {
+  margin: 2px 0;
+}
+
+.hourly-snap-temp {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.hourly-snap-rain {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.hourly-snap-rain.has-rain {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.hourly-snap-wind {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}

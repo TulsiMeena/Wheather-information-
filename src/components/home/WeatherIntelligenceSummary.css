@@ -1,0 +1,210 @@
+.intelligence-summary-card {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-radius: var(--radius-xl);
+}
+
+.intelligence-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.intel-title-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.intel-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.intel-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* Active Alert Banner */
+.intel-active-alert-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-radius: var(--radius-lg);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  transition: all var(--duration-fast);
+}
+
+.intel-active-alert-pill:hover {
+  background: rgba(239, 68, 68, 0.14);
+  transform: translateY(-1px);
+}
+
+.alert-pill-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.pill-severity-indicator {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  background: #ef4444;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.pill-alert-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.alert-pill-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-primary);
+  font-size: 0.74rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Clear Alert Banner */
+.intel-clear-alert-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-radius: var(--radius-lg);
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  transition: all var(--duration-fast);
+}
+
+.intel-clear-alert-pill:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.pill-clear-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pill-clear-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* Chips Grid */
+.intel-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-2);
+}
+
+.intel-chip-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--duration-fast);
+}
+
+.intel-chip-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.chip-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chip-icon-box.aqi {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.chip-icon-box.uv {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.chip-icon-box.rain {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.chip-icon-box.map {
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+}
+
+.chip-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.chip-label {
+  font-size: 0.68rem;
+  color: var(--color-text-tertiary);
+}
+
+.chip-val {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip-arrow {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* Footer Summary Sentence */
+.intel-summary-footer {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.intel-summary-sentence {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}

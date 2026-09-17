@@ -1,0 +1,161 @@
+.weather-visual-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+  transition: background 800ms ease;
+}
+
+.atmospheric-gradient {
+  position: absolute;
+  inset: 0;
+  opacity: 0.85;
+}
+
+/* Atmospheric Gradients by Condition */
+.condition-clear .atmospheric-gradient {
+  background: radial-gradient(circle at 75% 20%, rgba(56, 189, 248, 0.22) 0%, rgba(14, 116, 144, 0.08) 50%, transparent 80%),
+              linear-gradient(180deg, rgba(3, 105, 161, 0.12) 0%, transparent 60%);
+}
+
+.condition-night .atmospheric-gradient {
+  background: radial-gradient(circle at 80% 25%, rgba(129, 140, 248, 0.18) 0%, rgba(49, 46, 129, 0.1) 45%, transparent 75%),
+              linear-gradient(180deg, rgba(15, 23, 42, 0.3) 0%, transparent 70%);
+}
+
+.condition-cloudy .atmospheric-gradient {
+  background: radial-gradient(circle at 50% 30%, rgba(148, 163, 184, 0.15) 0%, rgba(71, 85, 105, 0.08) 55%, transparent 80%),
+              linear-gradient(180deg, rgba(51, 65, 85, 0.15) 0%, transparent 70%);
+}
+
+.condition-rain .atmospheric-gradient {
+  background: radial-gradient(circle at 60% 20%, rgba(59, 130, 246, 0.18) 0%, rgba(30, 58, 138, 0.12) 60%, transparent 85%),
+              linear-gradient(180deg, rgba(30, 64, 175, 0.15) 0%, transparent 70%);
+}
+
+.condition-thunderstorm .atmospheric-gradient {
+  background: radial-gradient(circle at 50% 20%, rgba(168, 85, 247, 0.15) 0%, rgba(88, 28, 135, 0.12) 50%, transparent 80%),
+              linear-gradient(180deg, rgba(76, 29, 149, 0.18) 0%, transparent 75%);
+}
+
+.condition-snow .atmospheric-gradient {
+  background: radial-gradient(circle at 50% 30%, rgba(224, 242, 254, 0.2) 0%, rgba(186, 230, 253, 0.08) 60%, transparent 80%);
+}
+
+.condition-fog .atmospheric-gradient {
+  background: radial-gradient(circle at 50% 40%, rgba(203, 213, 225, 0.15) 0%, rgba(100, 116, 139, 0.08) 60%, transparent 85%);
+}
+
+/* Atmospheric Elements */
+.atmosphere-elements {
+  position: absolute;
+  inset: 0;
+}
+
+/* Clear Sky Sun */
+.sun-glow {
+  position: absolute;
+  top: 8%;
+  right: 12%;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, rgba(253, 224, 71, 0.1) 40%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(14px);
+  animation: sunPulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes sunPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  100% { transform: scale(1.05); opacity: 1; }
+}
+
+/* Night Sky Stars */
+.moon-glow {
+  position: absolute;
+  top: 10%;
+  right: 14%;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(199, 210, 254, 0.25) 0%, rgba(129, 140, 248, 0.08) 50%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(10px);
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.star-1 { top: 12%; left: 25%; animation: starTwinkle 3s infinite ease-in-out; }
+.star-2 { top: 22%; left: 70%; animation: starTwinkle 4s infinite 1s ease-in-out; }
+.star-3 { top: 32%; left: 45%; animation: starTwinkle 3.5s infinite 1.5s ease-in-out; }
+.star-4 { top: 18%; left: 88%; animation: starTwinkle 4.5s infinite 2s ease-in-out; }
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 0.9; transform: scale(1.2); }
+}
+
+/* Rain and Clouds */
+.cloud {
+  position: absolute;
+  background: rgba(148, 163, 184, 0.08);
+  border-radius: 100px;
+  filter: blur(20px);
+}
+
+.cloud-back {
+  top: 10%;
+  left: 10%;
+  width: 320px;
+  height: 120px;
+}
+
+.cloud-front {
+  top: 18%;
+  right: 8%;
+  width: 280px;
+  height: 100px;
+}
+
+.raindrops {
+  position: absolute;
+  inset: 0;
+}
+
+.drop {
+  position: absolute;
+  width: 1px;
+  height: 20px;
+  background: linear-gradient(180deg, transparent, rgba(56, 189, 248, 0.4));
+  animation: rainFall 1.5s linear infinite;
+}
+
+.drop-1 { left: 25%; top: -20px; animation-delay: 0.1s; }
+.drop-2 { left: 55%; top: -20px; animation-delay: 0.5s; }
+.drop-3 { left: 75%; top: -20px; animation-delay: 0.9s; }
+.drop-4 { left: 40%; top: -20px; animation-delay: 1.2s; }
+
+@keyframes rainFall {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 0.8; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .sun-glow, .star-1, .star-2, .star-3, .star-4, .drop {
+    animation: none !important;
+  }
+}

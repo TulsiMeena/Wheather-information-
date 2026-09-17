@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Background squircle gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1329" />
+      <stop offset="45%" stop-color="#112240" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+
+    <!-- Warm Golden Sun gradient -->
+    <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="30%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+
+    <!-- Dimensional Cloud gradient -->
+    <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="65%" stop-color="#f0fdf4" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </linearGradient>
+
+    <!-- Ambient backlight filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Soft shadow for cloud -->
+    <filter id="cloudShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#030712" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Base App Icon Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect width="508" height="508" x="2" y="2" rx="110" stroke="rgba(255,255,255,0.12)" stroke-width="3" />
+
+  <!-- Radiating Sun Glow -->
+  <circle cx="210" cy="190" r="95" fill="url(#sunGrad)" opacity="0.3" filter="url(#glow)" />
+
+  <!-- Radiant Golden Sun -->
+  <circle cx="210" cy="190" r="82" fill="url(#sunGrad)" />
+
+  <!-- Sun Rays Flare -->
+  <g stroke="#fde047" stroke-width="7" stroke-linecap="round" opacity="0.85">
+    <line x1="210" y1="75" x2="210" y2="92" />
+    <line x1="210" y1="288" x2="210" y2="305" />
+    <line x1="95" y1="190" x2="112" y2="190" />
+    <line x1="308" y1="190" x2="325" y2="190" />
+    <line x1="129" y1="109" x2="141" y2="121" />
+    <line x1="279" y1="259" x2="291" y2="271" />
+    <line x1="129" y1="271" x2="141" y2="259" />
+    <line x1="279" y1="121" x2="291" y2="109" />
+  </g>
+
+  <!-- Fluffy Meteorological Cloud with dimensional shadow -->
+  <g filter="url(#cloudShadow)">
+    <path d="M375 365 H175 a 70 70 0 0 1 -12 -139 a 85 85 0 0 1 164 -29 a 72 72 0 0 1 48 168 z" fill="url(#cloudGrad)" />
+  </g>
+
+  <!-- Cyan Synoptic Rain Accents -->
+  <g fill="#38bdf8" filter="url(#glow)">
+    <path d="M220 395 C215 405 210 422 220 432 C228 440 236 432 238 424 C240 414 228 395 220 395 Z" opacity="0.9" />
+    <path d="M275 390 C270 400 265 417 275 427 C283 435 291 427 293 419 C295 409 283 390 275 390 Z" opacity="0.95" />
+    <path d="M330 398 C325 407 321 422 329 430 C336 437 343 430 345 423 C347 414 337 398 330 398 Z" opacity="0.85" />
+  </g>
+</svg>

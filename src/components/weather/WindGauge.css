@@ -1,0 +1,132 @@
+.wind-gauge-card {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.wind-gauge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wind-header-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.wind-gauge-heading {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.wind-cardinal-badge {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(14, 165, 233, 0.15);
+  color: var(--color-primary);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.wind-gauge-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.compass-visual-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.compass-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--color-bg-input);
+  border: 1.5px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compass-mark {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.mark-n { top: 3px; }
+.mark-e { right: 5px; }
+.mark-s { bottom: 3px; }
+.mark-w { left: 5px; }
+
+.compass-needle-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.compass-needle-arrow {
+  position: absolute;
+  top: 10px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 22px solid var(--color-primary);
+  filter: drop-shadow(0 2px 4px rgba(14, 165, 233, 0.4));
+}
+
+.compass-needle-pivot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  z-index: 2;
+}
+
+.compass-degrees-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.wind-telemetry-data {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.wind-stat-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.wind-stat-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.wind-stat-value {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}

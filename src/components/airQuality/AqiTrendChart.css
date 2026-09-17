@@ -1,0 +1,173 @@
+.aqi-trend-chart-card {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow: hidden;
+}
+
+.aqi-trend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.aqi-trend-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.aqi-trend-subtitle {
+  font-size: 0.76rem;
+  color: var(--color-text-tertiary);
+  margin: 2px 0 0 0;
+}
+
+.aqi-metric-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+}
+
+.metric-tab-btn {
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.metric-tab-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.metric-tab-btn.active {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.aqi-tooltip-dock {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.aqi-tooltip-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+}
+
+.tooltip-time {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.tooltip-val {
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+.tooltip-instruction {
+  font-size: 0.72rem;
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.aqi-chart-scroll-viewport {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: var(--space-2);
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.aqi-chart-canvas-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.aqi-chart-svg {
+  display: block;
+  overflow: visible;
+}
+
+.now-point-pulse {
+  animation: aqi-pulse 2s ease-out infinite;
+}
+
+@keyframes aqi-pulse {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.chart-point-group {
+  cursor: pointer;
+}
+
+.aqi-timeline-labels {
+  display: flex;
+  margin-top: 6px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 6px;
+}
+
+.timeline-hour-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+  border-radius: var(--radius-sm);
+  padding: 2px 0;
+}
+
+.timeline-hour-slot:hover,
+.timeline-hour-slot.active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.timeline-hour-slot.is-now .hour-text {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.hour-text {
+  font-size: 0.68rem;
+  color: var(--color-text-tertiary);
+}
+
+.hour-val {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+}
+
+.aqi-chart-empty-state {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-size: 0.85rem;
+}

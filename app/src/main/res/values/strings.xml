@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Amit Meena Weather</string>
+    <string name="tab_today">Today</string>
+    <string name="tab_forecast">Forecast</string>
+    <string name="tab_aqi">Air Quality</string>
+    <string name="tab_cities">Cities</string>
+    <string name="tab_settings">Settings</string>
+    <string name="refresh_weather">Refresh weather data</string>
+    <string name="search_cities">Search city name...</string>
+    <string name="temp_celsius">Celsius (°C)</string>
+    <string name="temp_fahrenheit">Fahrenheit (°F)</string>
+</resources>
